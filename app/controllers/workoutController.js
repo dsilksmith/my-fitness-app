@@ -2,8 +2,8 @@
 import Workout from '../models/workoutModel.js';
 
 // --- STATE ---
-// An array to hold all our workout objects. This acts as our in-memory "database".
-const workouts = [];
+// Load workouts from localStorage when the app starts.
+let workouts = loadWorkouts();
 
 // --- DOM ELEMENTS ---
 const workoutForm = document.getElementById('workout-form');
@@ -11,22 +11,18 @@ const workoutTypeInput = document.getElementById('workout-type');
 const distanceInput = document.getElementById('distance');
 const durationInput = document.getElementById('duration');
 const dateInput = document.getElementById('date');
-const workoutList = document.getElementById('workout-list'); // Get the container for our list
+const workoutList = document.getElementById('workout-list');
 
 // --- FUNCTIONS ---
+
 /**
  * Renders the list of workouts to the page.
  */
 function renderWorkouts() {
-    // 1. Clear the existing list to prevent duplicates
     workoutList.innerHTML = '';
-
-    // 2. Add a title for the workout list
     if (workouts.length > 0) {
         workoutList.innerHTML = '<h2 class="mb-4">Logged Workouts</h2>';
     }
-
-    // 3. Loop through each workout and create the HTML for it
     workouts.forEach(workout => {
         const workoutElement = document.createElement('div');
         workoutElement.classList.add('card', 'mb-3');
@@ -39,6 +35,36 @@ function renderWorkouts() {
         workoutList.appendChild(workoutElement);
     });
 }
+
+/**
+ * Saves the current workouts array to localStorage.
+ */
+function saveWorkouts() {
+    // localStorage can only store strings, so we convert our array to a JSON string.
+    localStorage.setItem('fitness-tracker-workouts', JSON.stringify(workouts));
+}
+
+/**
+ * Loads workouts from localStorage.
+ * @returns {Workout[]} An array of Workout instances.
+ */
+function loadWorkouts() {
+    const savedWorkouts = localStorage.getItem('fitness-tracker-workouts');
+    if (!savedWorkouts) {
+        return []; // Return an empty array if nothing is saved
+    }
+
+    // Convert the JSON string back into a plain JavaScript array
+    const parsedWorkouts = JSON.parse(savedWorkouts);
+
+    // Convert the plain objects back into instances of our Workout class
+    // This is important so they have access to methods like getSummary()
+    return parsedWorkouts.map(w => new Workout(w.type, w.distance, w.duration, new Date(w.date)));
+}
+
+// --- INITIAL RENDER ---
+// Display any saved workouts as soon as the page loads.
+renderWorkouts();
 
 
 // --- EVENT LISTENER ---
@@ -57,9 +83,12 @@ workoutForm.addEventListener('submit', function(event) {
     // 3. Add the new workout to our array
     workouts.push(newWorkout);
 
-    // 4. Re-render the list of workouts on the page
+    // 4. Save the updated array to localStorage
+    saveWorkouts();
+
+    // 5. Re-render the list
     renderWorkouts();
 
-    // 5. Clear the form
+    // 6. Clear the form
     workoutForm.reset();
 });
