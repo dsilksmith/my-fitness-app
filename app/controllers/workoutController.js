@@ -2,7 +2,6 @@
 import Workout from '../models/workoutModel.js';
 
 // --- STATE ---
-// Load workouts from localStorage when the app starts.
 let workouts = loadWorkouts();
 
 // --- DOM ELEMENTS ---
@@ -15,9 +14,6 @@ const workoutList = document.getElementById('workout-list');
 
 // --- FUNCTIONS ---
 
-/**
- * Renders the list of workouts to the page.
- */
 function renderWorkouts() {
     workoutList.innerHTML = '';
     if (workouts.length > 0) {
@@ -27,68 +23,67 @@ function renderWorkouts() {
         const workoutElement = document.createElement('div');
         workoutElement.classList.add('card', 'mb-3');
         workoutElement.innerHTML = `
-            <div class="card-body">
-                <h5 class="card-title">${workout.type}</h5>
-                <p class="card-text">${workout.getSummary()}</p>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title">${workout.type}</h5>
+                    <p class="card-text mb-0">${workout.getSummary()}</p>
+                </div>
+                <button class="btn btn-danger btn-sm delete-btn" data-id="${workout.id}">Delete</button>
             </div>
         `;
         workoutList.appendChild(workoutElement);
     });
 }
 
-/**
- * Saves the current workouts array to localStorage.
- */
 function saveWorkouts() {
-    // localStorage can only store strings, so we convert our array to a JSON string.
     localStorage.setItem('fitness-tracker-workouts', JSON.stringify(workouts));
 }
 
-/**
- * Loads workouts from localStorage.
- * @returns {Workout[]} An array of Workout instances.
- */
 function loadWorkouts() {
     const savedWorkouts = localStorage.getItem('fitness-tracker-workouts');
-    if (!savedWorkouts) {
-        return []; // Return an empty array if nothing is saved
-    }
-
-    // Convert the JSON string back into a plain JavaScript array
+    if (!savedWorkouts) return [];
     const parsedWorkouts = JSON.parse(savedWorkouts);
-
-    // Convert the plain objects back into instances of our Workout class
-    // This is important so they have access to methods like getSummary()
     return parsedWorkouts.map(w => new Workout(w.type, w.distance, w.duration, new Date(w.date)));
 }
 
+// NEW: Function to delete a workout by its ID
+function deleteWorkout(id) {
+    // Find the index of the workout to delete
+    const workoutIndex = workouts.findIndex(workout => workout.id === id);
+
+    // If found, remove it from the array
+    if (workoutIndex > -1) {
+        workouts.splice(workoutIndex, 1);
+        saveWorkouts(); // Save the updated array
+        renderWorkouts(); // Re-render the list
+    }
+}
+
 // --- INITIAL RENDER ---
-// Display any saved workouts as soon as the page loads.
 renderWorkouts();
 
 
-// --- EVENT LISTENER ---
+// --- EVENT LISTENERS ---
 workoutForm.addEventListener('submit', function(event) {
     event.preventDefault();
-
-    // 1. Get user input
     const type = workoutTypeInput.value;
     const distance = parseFloat(distanceInput.value);
     const duration = parseInt(durationInput.value);
     const date = new Date(dateInput.value);
 
-    // 2. Create a new workout instance
     const newWorkout = new Workout(type, distance, duration, date);
-
-    // 3. Add the new workout to our array
     workouts.push(newWorkout);
-
-    // 4. Save the updated array to localStorage
     saveWorkouts();
-
-    // 5. Re-render the list
     renderWorkouts();
-
-    // 6. Clear the form
     workoutForm.reset();
+});
+
+// NEW: Event listener for the entire workout list (Event Delegation)
+workoutList.addEventListener('click', function(event) {
+    // Check if a delete button was clicked
+    if (event.target.classList.contains('delete-btn')) {
+        // Get the id from the data-id attribute
+        const workoutId = parseInt(event.target.dataset.id);
+        deleteWorkout(workoutId);
+    }
 });
