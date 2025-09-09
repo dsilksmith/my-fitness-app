@@ -11,6 +11,10 @@ const distanceInput = document.getElementById('distance');
 const durationInput = document.getElementById('duration');
 const dateInput = document.getElementById('date');
 const workoutList = document.getElementById('workout-list');
+// NEW: Get the canvas element and its 2D drawing context
+const canvas = document.getElementById('workout-chart');
+const ctx = canvas.getContext('2d');
+
 
 // --- FUNCTIONS ---
 
@@ -33,6 +37,44 @@ function renderWorkouts() {
         `;
         workoutList.appendChild(workoutElement);
     });
+    
+    // UPDATED: Re-render the chart whenever the workout list is updated
+    renderChart();
+}
+
+// NEW: Function to draw the workout chart on the canvas
+function renderChart() {
+    // 1. Clear the canvas before drawing
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 2. Get the last 5 workouts for the chart
+    const chartData = workouts.slice(-5);
+    if (chartData.length === 0) return; // Don't draw if there's no data
+
+    // 3. Find the maximum distance to scale the bars
+    const maxDistance = Math.max(...chartData.map(w => w.distance));
+    
+    // 4. Set chart parameters
+    const barWidth = 40;
+    const spacing = 30;
+    const chartHeight = canvas.height - 20; // Leave space for text
+    const startX = 30;
+
+    // 5. Loop through the data and draw each bar
+    chartData.forEach((workout, index) => {
+        const barHeight = (workout.distance / maxDistance) * chartHeight;
+        const x = startX + index * (barWidth + spacing);
+        const y = canvas.height - barHeight - 10; // Position from the bottom up
+
+        // Draw the bar
+        ctx.fillStyle = '#0d6efd'; // A nice blue color
+        ctx.fillRect(x, y, barWidth, barHeight);
+
+        // Draw the distance text above the bar
+        ctx.fillStyle = '#333';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${workout.distance} km`, x + barWidth / 2, y - 5);
+    });
 }
 
 function saveWorkouts() {
@@ -46,16 +88,12 @@ function loadWorkouts() {
     return parsedWorkouts.map(w => new Workout(w.type, w.distance, w.duration, new Date(w.date)));
 }
 
-// NEW: Function to delete a workout by its ID
 function deleteWorkout(id) {
-    // Find the index of the workout to delete
     const workoutIndex = workouts.findIndex(workout => workout.id === id);
-
-    // If found, remove it from the array
     if (workoutIndex > -1) {
         workouts.splice(workoutIndex, 1);
-        saveWorkouts(); // Save the updated array
-        renderWorkouts(); // Re-render the list
+        saveWorkouts();
+        renderWorkouts();
     }
 }
 
@@ -64,6 +102,7 @@ renderWorkouts();
 
 
 // --- EVENT LISTENERS ---
+// ... (No changes to the event listeners) ...
 workoutForm.addEventListener('submit', function(event) {
     event.preventDefault();
     const type = workoutTypeInput.value;
@@ -78,11 +117,8 @@ workoutForm.addEventListener('submit', function(event) {
     workoutForm.reset();
 });
 
-// NEW: Event listener for the entire workout list (Event Delegation)
 workoutList.addEventListener('click', function(event) {
-    // Check if a delete button was clicked
     if (event.target.classList.contains('delete-btn')) {
-        // Get the id from the data-id attribute
         const workoutId = parseInt(event.target.dataset.id);
         deleteWorkout(workoutId);
     }
