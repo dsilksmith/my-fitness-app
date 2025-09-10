@@ -32,7 +32,11 @@
                 <label for="date" class="form-label">Date</label>
                 <input type="date" id="date" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Save Workout</button>
+
+            <input type="hidden" id="edit-mode-id">
+
+            <button type="submit" id="save-workout-btn" class="btn btn-primary w-100">Save Workout</button>
+
         </form>
         <div class="p-4 bg-white rounded shadow-sm mb-5">
             <h2 class="mb-3">Recent Activity</h2>
