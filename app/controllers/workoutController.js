@@ -16,6 +16,34 @@ const saveWorkoutBtn = document.getElementById('save-workout-btn');
 const canvas = document.getElementById('workout-chart');
 const ctx = canvas.getContext('2d');
 
+// ... after the existing DOM ELEMENTS section ...
+
+const themeToggle = document.getElementById('theme-toggle');
+
+// --- THEME SWITCHING ---
+
+// Function to set the theme
+function setTheme(theme) {
+    document.body.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+    // Update the toggle's checked state
+    themeToggle.checked = theme === 'dark';
+}
+
+// Event listener for the toggle
+themeToggle.addEventListener('change', () => {
+    const newTheme = themeToggle.checked ? 'dark' : 'light';
+    setTheme(newTheme);
+});
+
+// Function to load the saved theme on startup
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+}
+
+// Load the theme when the app starts
+loadTheme();
 
 // --- FUNCTIONS ---
 
