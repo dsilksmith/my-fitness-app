@@ -6,17 +6,18 @@ A single-page web application designed to help athletes log, track, and visualiz
 
 ## Project Status
 
-**Prototype Complete:** The application has full Create, Read, and Delete (CRD) functionality, local data persistence, and a simple data visualization feature.
+**CRUD Prototype Complete:** The application has full Create, Read, Update, and Delete (CRUD) functionality, local data persistence, and a simple data visualization feature.
 
 ***
 
 ## Features
 
-* **Log Workouts:** Add new workouts by specifying the type (e.g., Running, Cycling), distance, duration, and date.
+* **Log Workouts:** Add new workouts by specifying the type, distance, duration, and date.
 * **View Workout List:** See a dynamically updated list of all logged workouts.
+* **Update Existing Workouts:** Modify the details of any previously logged workout.
 * **Delete Workouts:** Remove any workout from the list with a single click.
-* **Persistent Storage:** All data is saved in the browser's `localStorage`, so your workouts are still there even after you close the page.
-* **Data Visualization:** A simple bar chart, drawn with the HTML5 Canvas, displays the distances of your last five activities.
+* **Persistent Storage:** All data is saved in the browser's `localStorage`.
+* **Data Visualization:** A simple bar chart visualizes recent activity.
 
 ***
 
@@ -33,14 +34,11 @@ A single-page web application designed to help athletes log, track, and visualiz
 
 The application follows a Model-View-Controller (MVC) architecture to keep the code organized and maintainable:
 
-* **Model (`workoutModel.js`):** Defines the `Workout` JavaScript class. This class acts as a blueprint, specifying the data structure for a single workout (e.g., `id`, `type`, `distance`).
+* **Model (`workoutModel.js`):** Defines the `Workout` JavaScript class, which acts as a blueprint for workout data.
 
-* **View (`index.html`):** Provides the complete HTML structure for the user interface. This includes the input form for logging new workouts, the container where the list of workouts is displayed, and the `<canvas>` element for the chart.
+* **View (`index.html`):** Provides the complete HTML structure, including the input form, the workout list container, and the `<canvas>` element for the chart.
 
-* **Controller (`workoutController.js`):** Acts as the engine of the application. It listens for user events (like form submissions and button clicks), manages the application's state (the array of workouts), and coordinates between the Model and the View. It is responsible for:
-    1.  Handling form input to create new `Workout` instances (Model).
-    2.  Saving, loading, and deleting workouts from `localStorage`.
-    3.  Calling the render functions to update the workout list (View) and the chart (Canvas) whenever the data changes.
+* **Controller (`workoutController.js`):** Acts as the engine of the application. It listens for user events, manages the application's state (the array of workouts), and coordinates between the Model and the View. It handles form submissions for both creating new workouts and updating existing ones by managing an "edit mode". It also calls the render functions to update the UI whenever the data changes.
 
 ***
 
