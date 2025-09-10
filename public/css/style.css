@@ -57,3 +57,16 @@ body {
 .btn-primary:hover {
     background-color: #4d4fb8; /* A slightly darker shade for hover */
 }
+
+/* --- Animations & Transitions --- */
+
+/* Define the transition for the workout cards */
+.card {
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+/* Define the starting state for new cards entering the list */
+.workout-entering {
+    opacity: 0;
+    transform: translateY(20px);
+}

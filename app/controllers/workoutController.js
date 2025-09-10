@@ -20,7 +20,6 @@ const ctx = canvas.getContext('2d');
 // --- FUNCTIONS ---
 
 function renderWorkouts() {
-    // (This function remains the same)
     workoutList.innerHTML = '';
     if (workouts.length > 0) {
         workoutList.innerHTML = '<h2 class="mb-4">Logged Workouts</h2>';
@@ -28,6 +27,10 @@ function renderWorkouts() {
     workouts.forEach(workout => {
         const workoutElement = document.createElement('div');
         workoutElement.classList.add('card', 'mb-3');
+        
+        // UPDATED: Add the "entering" class to set the initial state
+        workoutElement.classList.add('workout-entering');
+
         workoutElement.innerHTML = `
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
@@ -41,6 +44,12 @@ function renderWorkouts() {
             </div>
         `;
         workoutList.appendChild(workoutElement);
+
+        // UPDATED: Use a tiny timeout to remove the class.
+        // This allows the browser to render the initial state before transitioning to the final state.
+        setTimeout(() => {
+            workoutElement.classList.remove('workout-entering');
+        }, 10);
     });
     renderChart();
 }
