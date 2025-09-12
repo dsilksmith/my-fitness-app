@@ -1,4 +1,6 @@
 import Workout from '../models/workoutModel.js';
+import * as workoutService from '../services/workoutService.js'; // NEW: Import the service
+
 
 window.addEventListener('load', () => {
 
@@ -168,7 +170,7 @@ window.addEventListener('load', () => {
             duration: parseInt(durationInput.value),
             date: new Date(dateInput.value)
         });
-        saveWorkouts();
+        workoutService.save(workouts);
         renderWorkouts();
     }
 
@@ -197,14 +199,14 @@ window.addEventListener('load', () => {
 
     function deleteWorkout(id) {
         workouts = workouts.filter(w => w.id !== id);
-        saveWorkouts();
+        workoutService.save(workouts); // UPDATED: Use the service
         renderWorkouts();
     }
 
     // --- APP INITIALIZATION ---
     function init() {
         loadInitialTheme();
-        loadWorkouts();
+        workouts = workoutService.load(); // UPDATED: Use the service
         setupChart();
         renderWorkouts();
     }
@@ -225,7 +227,7 @@ window.addEventListener('load', () => {
                 new Date(dateInput.value)
             );
             workouts.push(newWorkout);
-            saveWorkouts();
+            workoutService.save(workouts); // UPDATED: Use the service
             renderWorkouts();
         }
         resetForm();
