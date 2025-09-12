@@ -33,7 +33,7 @@ The application uses a **Model-View-Controller + Service (MVC-S)** architecture 
 This structure makes the application easy to maintain and scale. For example, to switch from `localStorage` to a real online database, we would only need to change the code in the **Service** file.
 
 ### Project Structure
-
+```
 fitness-tracker/
 └── app/
 ├── controllers/
@@ -47,7 +47,7 @@ fitness-tracker/
 └── public/
 └── css/
 └── style.css
-
+```
 ***
 
 ## Technology Stack
