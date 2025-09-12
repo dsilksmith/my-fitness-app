@@ -6,39 +6,40 @@ A single-page web application designed to help athletes log, track, and visualiz
 
 ## Project Status
 
-**CRUD Prototype Complete:** The application has full Create, Read, Update, and Delete (CRUD) functionality, local data persistence, and a simple data visualization feature.
+**Frontend Prototype Complete & Stable:** The application is fully functional with all core features implemented, including a stable charting component. The next phase will be refactoring for a backend connection.
 
 ***
 
 ## Features
 
-* **Log Workouts:** Add new workouts by specifying the type, distance, duration, and date.
-* **View Workout List:** See a dynamically updated list of all logged workouts.
-* **Update Existing Workouts:** Modify the details of any previously logged workout.
-* **Delete Workouts:** Remove any workout from the list with a single click.
-* **Persistent Storage:** All data is saved in the browser's `localStorage`.
-* **Data Visualization:** A simple bar chart visualizes recent activity.
+* **Full CRUD Functionality:** Log new workouts, view a dynamic list, update existing entries, and delete unwanted workouts.
+* **Polished User Interface:** A custom design with a modern font, clean layout, and a cohesive color scheme.
+* **Responsive Animations:** Smooth transitions provide satisfying visual feedback when adding new items to the workout list.
+* **Light & Dark Mode:** A theme toggle allows users to switch between light and dark modes for comfortable viewing.
+* **Persistent User Preferences:** The app remembers the user's theme choice between sessions using `localStorage`.
+* **Interactive Charting:** A responsive bar chart, powered by the Chart.js library, visualizes recent workout distances with interactive tooltips.
 
 ***
 
 ## Technology Stack
 
-* **Frontend:** HTML5, CSS3 (with Bootstrap 5 for styling), JavaScript (ES6 Modules)
+* **Frontend:** HTML5, CSS3 (with Google Fonts), JavaScript (ES6 Modules)
+* **Styling:** Bootstrap 5 (base), Custom CSS Properties (Variables)
 * **Architecture:** Model-View-Controller (MVC)
-* **Visualization:** HTML5 Canvas API
+* **Visualization:** Chart.js
 * **Storage:** Browser `localStorage` API
 
 ***
 
 ## How It Works
 
-The application follows a Model-View-Controller (MVC) architecture to keep the code organized and maintainable:
+The application follows a Model-View-Controller (MVC) architecture:
 
 * **Model (`workoutModel.js`):** Defines the `Workout` JavaScript class, which acts as a blueprint for workout data.
 
-* **View (`index.html`):** Provides the complete HTML structure, including the input form, the workout list container, and the `<canvas>` element for the chart.
+* **View (`index.html`):** Provides the complete HTML structure, including the input form, theme toggle, workout list container, and the `<canvas>` element for the chart.
 
-* **Controller (`workoutController.js`):** Acts as the engine of the application. It listens for user events, manages the application's state (the array of workouts), and coordinates between the Model and the View. It handles form submissions for both creating new workouts and updating existing ones by managing an "edit mode". It also calls the render functions to update the UI whenever the data changes.
+* **Controller (`workoutController.js`):** Acts as the engine of the application. It listens for user events, manages the application's state (the array of workouts), and coordinates between the Model and the View. It handles all CRUD logic, saves data to `localStorage`, and dynamically updates the Chart.js instance.
 
 ***
 

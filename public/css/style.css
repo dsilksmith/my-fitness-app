@@ -16,6 +16,7 @@ body {
     font-family: 'Poppins', sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* Style the main container for better centering and max-width */
@@ -29,7 +30,8 @@ body {
     border: none;
     border-radius: var(--border-radius);
     box-shadow: 0 4px 15px var(--shadow-color);
-    padding: 2rem; /* Add more internal spacing */
+    padding: 2rem;
+    transition: background-color 0.3s;
 }
 
 /* Style the workout cards in the list */
@@ -59,13 +61,9 @@ body {
 }
 
 /* --- Animations & Transitions --- */
-
-/* Define the transition for the workout cards */
 .card {
-    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out, background-color 0.3s;
 }
-
-/* Define the starting state for new cards entering the list */
 .workout-entering {
     opacity: 0;
     transform: translateY(20px);
@@ -77,7 +75,11 @@ body[data-theme='dark'] {
     --surface-color: #1E1E1E;
     --text-color: #E0E0E0;
     --shadow-color: rgba(0, 0, 0, 0.2);
-    --primary-color: #7B7EFF; /* A slightly lighter purple for contrast */
+    --primary-color: #7B7EFF;
+}
+
+body[data-theme='dark'] .card {
+    border-color: #333;
 }
 
 /* Style the theme toggle switch */

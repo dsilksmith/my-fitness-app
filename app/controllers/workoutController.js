@@ -1,200 +1,245 @@
 import Workout from '../models/workoutModel.js';
 
-// --- STATE ---
-let workouts = loadWorkouts();
+window.addEventListener('load', () => {
 
-// --- DOM ELEMENTS ---
-// (All the getElementById calls remain the same...)
-const workoutForm = document.getElementById('workout-form');
-const workoutTypeInput = document.getElementById('workout-type');
-const distanceInput = document.getElementById('distance');
-const durationInput = document.getElementById('duration');
-const dateInput = document.getElementById('date');
-const workoutList = document.getElementById('workout-list');
-const editModeInput = document.getElementById('edit-mode-id');
-const saveWorkoutBtn = document.getElementById('save-workout-btn');
-const canvas = document.getElementById('workout-chart');
-const ctx = canvas.getContext('2d');
+    // --- STATE ---
+    let workouts = [];
+    let workoutChart = null;
 
-// ... after the existing DOM ELEMENTS section ...
+    // --- DOM ELEMENTS ---
+    const workoutForm = document.getElementById('workout-form');
+    const workoutTypeInput = document.getElementById('workout-type');
+    const distanceInput = document.getElementById('distance');
+    const durationInput = document.getElementById('duration');
+    const dateInput = document.getElementById('date');
+    const workoutList = document.getElementById('workout-list');
+    const editModeInput = document.getElementById('edit-mode-id');
+    const saveWorkoutBtn = document.getElementById('save-workout-btn');
+    const canvas = document.getElementById('workout-chart');
+    const ctx = canvas.getContext('2d');
+    const themeToggle = document.getElementById('theme-toggle');
 
-const themeToggle = document.getElementById('theme-toggle');
-
-// --- THEME SWITCHING ---
-
-// Function to set the theme
-function setTheme(theme) {
-    document.body.dataset.theme = theme;
-    localStorage.setItem('theme', theme);
-    // Update the toggle's checked state
-    themeToggle.checked = theme === 'dark';
-}
-
-// Event listener for the toggle
-themeToggle.addEventListener('change', () => {
-    const newTheme = themeToggle.checked ? 'dark' : 'light';
-    setTheme(newTheme);
-});
-
-// Function to load the saved theme on startup
-function loadTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-}
-
-// Load the theme when the app starts
-loadTheme();
-
-// --- FUNCTIONS ---
-
-function renderWorkouts() {
-    workoutList.innerHTML = '';
-    if (workouts.length > 0) {
-        workoutList.innerHTML = '<h2 class="mb-4">Logged Workouts</h2>';
+    // --- THEME ---
+    function applyTheme(theme) {
+        document.body.dataset.theme = theme;
+        themeToggle.checked = theme === 'dark';
     }
-    workouts.forEach(workout => {
-        const workoutElement = document.createElement('div');
-        workoutElement.classList.add('card', 'mb-3');
-        
-        // UPDATED: Add the "entering" class to set the initial state
-        workoutElement.classList.add('workout-entering');
 
-        workoutElement.innerHTML = `
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="card-title">${workout.type}</h5>
-                    <p class="card-text mb-0">${workout.getSummary()}</p>
-                </div>
-                <div>
-                    <button class="btn btn-secondary btn-sm edit-btn me-2" data-id="${workout.id}">Edit</button>
-                    <button class="btn btn-danger btn-sm delete-btn" data-id="${workout.id}">Delete</button>
-                </div>
-            </div>
-        `;
-        workoutList.appendChild(workoutElement);
+    function setTheme(theme) {
+        applyTheme(theme);
+        localStorage.setItem('theme', theme);
+    }
 
-        // UPDATED: Use a tiny timeout to remove the class.
-        // This allows the browser to render the initial state before transitioning to the final state.
-        setTimeout(() => {
-            workoutElement.classList.remove('workout-entering');
-        }, 10);
+    themeToggle.addEventListener('change', () => {
+        const newTheme = themeToggle.checked ? 'dark' : 'light';
+        setTheme(newTheme);
+        updateChartColors();
     });
-    renderChart();
-}
 
-function startEditWorkout(id) {
-    // (This function remains the same)
-    const workout = workouts.find(w => w.id === id);
-    if (!workout) return;
-    workoutTypeInput.value = workout.type;
-    distanceInput.value = workout.distance;
-    durationInput.value = workout.duration;
-    dateInput.value = new Date(workout.date).toISOString().split('T')[0];
-    editModeInput.value = id;
-    saveWorkoutBtn.textContent = 'Update Workout';
-    workoutForm.scrollIntoView({ behavior: 'smooth' });
-}
-
-function updateWorkout(id) {
-    // (This function remains the same)
-    const workout = workouts.find(w => w.id === id);
-    if (!workout) return;
-    workout.type = workoutTypeInput.value;
-    workout.distance = parseFloat(distanceInput.value);
-    workout.duration = parseInt(durationInput.value);
-    workout.date = new Date(dateInput.value);
-    saveWorkouts();
-    renderWorkouts();
-}
-
-function resetForm() {
-    // (This function remains the same)
-    workoutForm.reset();
-    editModeInput.value = '';
-    saveWorkoutBtn.textContent = 'Save Workout';
-}
-
-function renderChart() {
-    // (This function remains the same)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const chartData = workouts.slice(-5);
-    if (chartData.length === 0) return;
-    const maxDistance = Math.max(...chartData.map(w => w.distance));
-    const barWidth = 40;
-    const spacing = 30;
-    const chartHeight = canvas.height - 20;
-    const startX = 30;
-    chartData.forEach((workout, index) => {
-        const barHeight = (workout.distance / maxDistance) * chartHeight;
-        const x = startX + index * (barWidth + spacing);
-        const y = canvas.height - barHeight - 10;
-        ctx.fillStyle = '#0d6efd';
-        ctx.fillRect(x, y, barWidth, barHeight);
-        ctx.fillStyle = '#333';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${workout.distance} km`, x + barWidth / 2, y - 5);
-    });
-}
-
-function saveWorkouts() {
-    // (This function remains the same)
-    localStorage.setItem('fitness-tracker-workouts', JSON.stringify(workouts));
-}
-
-// THIS IS THE SECOND IMPORTANT FIX
-function loadWorkouts() {
-    const savedWorkouts = localStorage.getItem('fitness-tracker-workouts');
-    if (!savedWorkouts) return [];
+    function loadInitialTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+    }
     
-    const parsedWorkouts = JSON.parse(savedWorkouts);
+    function updateChartColors() {
+        if (!workoutChart) return;
+        const themePrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#5E60CE';
+        workoutChart.data.datasets[0].backgroundColor = themePrimaryColor;
+        workoutChart.update();
+    }
+    
 
-    // UPDATED: Now we pass the existing ID (w.id) to the constructor
-    return parsedWorkouts.map(w => new Workout(w.type, w.distance, w.duration, new Date(w.date), w.id));
-}
 
-function deleteWorkout(id) {
-    // (This function remains the same)
-    const workoutIndex = workouts.findIndex(workout => workout.id === id);
-    if (workoutIndex > -1) {
-        workouts.splice(workoutIndex, 1);
+    // --- CHART ---
+    function setupChart() {
+        if (!ctx) return;
+        if (workoutChart) {
+            workoutChart.destroy();
+        }
+        const themePrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#5E60CE';
+
+        let labels, data, yMax;
+        if (workouts.length > 0) {
+            const chartData = workouts.slice(-7);
+            labels = chartData.map(w => new Date(w.date).toLocaleDateString());
+            data = chartData.map(w => w.distance);
+            yMax = undefined; // Let Chart.js auto-scale
+        } else {
+            labels = ['No workouts yet'];
+            data = [0];
+            yMax = 10; // Set a reasonable max for empty chart
+        }
+
+        workoutChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Distance (km)',
+                    data: data,
+                    backgroundColor: themePrimaryColor,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true, // <-- THIS SHOULD BE TRUE
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: yMax,
+                        title: { display: true, text: 'Distance (km)' }
+                    },
+                    x: { title: { display: true, text: 'Workout Date' } }
+                }
+            }
+        });
+    }
+
+    function updateChartData() {
+        if (!workoutChart) return;
+
+        let labels, data, yMax;
+        if (workouts.length > 0) {
+            const chartData = workouts.slice(-7);
+            labels = chartData.map(w => new Date(w.date).toLocaleDateString());
+            data = chartData.map(w => w.distance);
+            yMax = undefined;
+        } else {
+            labels = ['No workouts yet'];
+            data = [0];
+            yMax = 10;
+        }
+
+        workoutChart.data.labels = labels;
+        workoutChart.data.datasets[0].data = data;
+        workoutChart.options.scales.y.max = yMax;
+        workoutChart.update();
+    }
+
+    // --- WORKOUTS ---
+    function renderWorkouts() {
+        workoutList.innerHTML = '';
+        if (workouts.length > 0) {
+            workoutList.innerHTML = '<h2 class="mb-4">Logged Workouts</h2>';
+        }
+        workouts.sort((a, b) => new Date(b.date) - new Date(a.date));
+        workouts.forEach(workout => {
+            const workoutElement = document.createElement('div');
+            workoutElement.classList.add('card', 'mb-3');
+            workoutElement.innerHTML = `
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">${workout.type}</h5>
+                        <p class="card-text mb-0">${workout.getSummary()}</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary btn-sm edit-btn me-2" data-id="${workout.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="${workout.id}">Delete</button>
+                    </div>
+                </div>
+            `;
+            workoutList.appendChild(workoutElement);
+            workoutElement.classList.add('workout-entering');
+            setTimeout(() => workoutElement.classList.remove('workout-entering'), 10);
+        });
+        updateChartData();
+    }
+    
+    function startEditWorkout(id) {
+        const workout = workouts.find(w => w.id === id);
+        if (!workout) return;
+        workoutTypeInput.value = workout.type;
+        distanceInput.value = workout.distance;
+        durationInput.value = workout.duration;
+        dateInput.value = new Date(workout.date).toISOString().split('T')[0];
+        editModeInput.value = id;
+        saveWorkoutBtn.textContent = 'Update Workout';
+        workoutForm.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateWorkout(id) {
+        const workout = workouts.find(w => w.id === id);
+        if (!workout) return;
+        Object.assign(workout, {
+            type: workoutTypeInput.value,
+            distance: parseFloat(distanceInput.value),
+            duration: parseInt(durationInput.value),
+            date: new Date(dateInput.value)
+        });
         saveWorkouts();
         renderWorkouts();
     }
-}
 
-// --- INITIAL RENDER ---
-renderWorkouts();
+    function resetForm() {
+        workoutForm.reset();
+        editModeInput.value = '';
+        saveWorkoutBtn.textContent = 'Save Workout';
+    }
 
-// --- EVENT LISTENERS ---
-// (All event listeners remain the same)
-workoutForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-    // The editId logic now works with string UUIDs, so parseInt is removed.
-    const editId = editModeInput.value;
+    function saveWorkouts() {
+        localStorage.setItem('fitness-tracker-workouts', JSON.stringify(workouts));
+    }
 
-    if (editId) {
-        updateWorkout(editId);
-    } else {
-        const newWorkout = new Workout(
-            workoutTypeInput.value,
-            parseFloat(distanceInput.value),
-            parseInt(durationInput.value),
-            new Date(dateInput.value)
-        );
-        workouts.push(newWorkout);
+    function loadWorkouts() {
+        const savedWorkoutsJSON = localStorage.getItem('fitness-tracker-workouts');
+        if (savedWorkoutsJSON) {
+            try {
+                const savedWorkouts = JSON.parse(savedWorkoutsJSON);
+                workouts = savedWorkouts.map(w => new Workout(w.type, w.distance, w.duration, new Date(w.date), w.id));
+            } catch (e) {
+                console.error("Error parsing workouts from localStorage", e);
+                workouts = [];
+            }
+        }
+    }
+
+    function deleteWorkout(id) {
+        workouts = workouts.filter(w => w.id !== id);
         saveWorkouts();
         renderWorkouts();
     }
-    
-    resetForm();
-});
 
-workoutList.addEventListener('click', function(event) {
-    const id = event.target.dataset.id; // ID is now a string
-
-    if (event.target.classList.contains('delete-btn')) {
-        deleteWorkout(id);
-    } else if (event.target.classList.contains('edit-btn')) {
-        startEditWorkout(id);
+    // --- APP INITIALIZATION ---
+    function init() {
+        loadInitialTheme();
+        loadWorkouts();
+        setupChart();
+        renderWorkouts();
     }
+
+    init();
+
+    // --- EVENT LISTENERS ---
+    workoutForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const editId = editModeInput.value;
+        if (editId) {
+            updateWorkout(editId);
+        } else {
+            const newWorkout = new Workout(
+                workoutTypeInput.value,
+                parseFloat(distanceInput.value),
+                parseInt(durationInput.value),
+                new Date(dateInput.value)
+            );
+            workouts.push(newWorkout);
+            saveWorkouts();
+            renderWorkouts();
+        }
+        resetForm();
+    });
+
+    workoutList.addEventListener('click', function(event) {
+        const button = event.target.closest('button');
+        if (!button || !button.dataset.id) return;
+
+        const id = button.dataset.id;
+        if (button.classList.contains('delete-btn')) {
+            deleteWorkout(id);
+        } else if (button.classList.contains('edit-btn')) {
+            startEditWorkout(id);
+        }
+    });
 });
